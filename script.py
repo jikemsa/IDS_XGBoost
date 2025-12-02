@@ -32,7 +32,7 @@ dataFrame = dataFrame.reset_index(drop=True)
 
 dataFrame = dataFrame.drop('FLOW ID', axis=1)
 X = dataFrame.drop('LABEL', axis=1)
-Y, uniqueLabels = pd.factorize(dataFrame['LABEL'])
+Y, uniqueLabels = pd.factorize(dataFrame['LABEL'], sort=True)
 #print(uniqueLabels)    #check we got the correct labels out
 #print(f"Y shape: {Y.shape}")
 #print(f"X shape: {X.shape}")    #check we have the right shapes
@@ -115,9 +115,11 @@ print(metrics.confusion_matrix(YTest, YPred))
 
 report_dictionary = metrics.classification_report(YTest, YPred, output_dict=True)
 metricsDataFrame = pd.DataFrame(report_dictionary).transpose()
-
 metricsDataFrame.loc['overall accuracy'] = pd.Series({'precision':accuracy,'recall':accuracy,'f1-score':accuracy})
 metricsDataFrame.to_csv('metrics.csv',index=True)
+
+labelFrame = pd.DataFrame(uniqueLabels).transpose()
+labelFrame.to_csv('labels.csv',index=True)
 
 modelFilename = "XGBoost_classifier.json"
 joblib.dump(model, modelFilename)
