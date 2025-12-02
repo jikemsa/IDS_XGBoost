@@ -1,12 +1,13 @@
 import ipaddress
 
+import joblib
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 import glob
 
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 from sklearn import metrics
@@ -60,7 +61,8 @@ X = X.drop(timestampCol, axis=1)
 numClasses = len(uniqueLabels)
 
 XNumPy = X.to_numpy()
-
+XNumPy[np.isinf(XNumPy)] =np.nan    #replaces inf with nans
+XNumPy = np.nan_to_num(XNumPy, nan=0)   #replaces nans with 0s
 #print(f"X Object Type:{type(XNumPy)}")
 #print(f"X Shape:{XNumPy.shape}")
 #print(f"Y Object Type: {type(Y)}")
@@ -81,23 +83,17 @@ model = XGBClassifier(
     num_class=numClasses,
     eval_metric='mlogloss',
     random_state=42,
-    n_estimators=200,
+    n_estimators=100,
     learning_rate=0.1,
 )
 
-print("Xtrain nans:",np.isnan(XTrain).sum())
-print("YTrain nans:",np.isnan(YTrain).sum())
-print("XTest nans:",np.isnan(XTest).sum())
-print("YTest nans:",np.isnan(YTest).sum())
+#print("Xtrain nans:",np.isnan(XTrain).sum())
+#print("YTrain nans:",np.isnan(YTrain).sum())
+#print("XTest nans:",np.isnan(XTest).sum())
+#print("YTest nans:",np.isnan(YTest).sum())
 #see where the nans are popping up. it's just in the X values thankfully
 
 
-XTrain[np.isinf(XTrain)] =np.nan
-XTest[np.isinf(XTest)] = np.nan
-#replaces inf with nans
-Xtrain = np.nan_to_num(XTrain, nan=0)
-Xtest = np.nan_to_num(XTest, nan=0)
-#replaces nans with 0s
 
 
 
@@ -116,3 +112,12 @@ print("Classification Report:")
 print(metrics.classification_report(YTest, YPred))
 print("Confusion matrix:")
 print(metrics.confusion_matrix(YTest, YPred))
+
+report_dictionary = metrics.classification_report(YTest, YPred, output_dict=True)
+metricsDataFrame = pd.DataFrame(report_dictionary).transpose()
+
+metricsDataFrame.loc['overall accuracy'] = pd.Series({'precision':accuracy,'recall':accuracy,'f1-score':accuracy})
+metricsDataFrame.to_csv('metrics.csv',index=True)
+
+modelFilename = "XGBoost_classifier.json"
+joblib.dump(model, modelFilename)
