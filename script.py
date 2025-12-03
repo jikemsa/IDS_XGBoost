@@ -70,6 +70,7 @@ XNumPy = np.nan_to_num(XNumPy, nan=0)   #replaces nans with 0s
 
 
 XTrain, XTest, YTrain, YTest = train_test_split(XNumPy, Y, test_size=0.2, random_state=42, stratify=Y)
+XTrain, XEval, YTrain, YEval = train_test_split(XTrain, YTrain, test_size=0.2, random_state=42)
 
 print("--- Data Split Complete ---")
 print(f"XTrain shape: {XTrain.shape}")
@@ -100,7 +101,7 @@ model = XGBClassifier(
 
 
 
-evalSet = [(XTest, YTest)]
+evalSet = [(XEval, YEval)]
 
 model.fit(XTrain, YTrain, eval_set=evalSet, early_stopping_rounds=5, verbose=True)     #True for debugging, false for clean
 YPred = model.predict(XTest)
