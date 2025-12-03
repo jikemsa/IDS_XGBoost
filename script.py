@@ -69,8 +69,8 @@ XNumPy = np.nan_to_num(XNumPy, nan=0)   #replaces nans with 0s
 #print(f"Y Shape: {Y.shape}")
 
 
-XTrain, XTest, YTrain, YTest = train_test_split(XNumPy, Y, test_size=0.2, random_state=42, stratify=Y)
-XTrain, XEval, YTrain, YEval = train_test_split(XTrain, YTrain, test_size=0.25, random_state=42)
+XTrainData, XTest, YTrainData, YTest = train_test_split(XNumPy, Y, test_size=0.15, random_state=42, stratify=Y)
+XTrain, XEval, YTrain, YEval = train_test_split(XTrainData, YTrainData, test_size=0.2, random_state=42)
 
 print("--- Data Split Complete ---")
 print(f"XTrain shape: {XTrain.shape}")
